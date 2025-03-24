@@ -50,11 +50,18 @@ commands:
         - copy
         - initCache
       parallel: true
+  - id: never-exit  # New command to sleep indefinitely
+    exec:
+      component: runtime  # Runs inside the runtime container
+      commandLine: "sleep infinity"
+      workingDir: "/"
+      label: "Sleep Forever" 
 events:
   preStart:
     - "connectDB"
   postStart:
     - "postStartCompositeCmd" 
+    - "never-exit"  # Added sleep command to postStart
   preStop:
     - "disconnectDB"
   postStop:
