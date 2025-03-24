@@ -18,7 +18,6 @@ commands:
       label: "Never Exiting Command"
       workingDir: "/projects"
       hotReloadCapable: false
-
 events:
   postStart:
     - never-exit
