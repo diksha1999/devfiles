@@ -1,0 +1,20 @@
+schemaVersion: 2.2.0
+metadata:
+  name: empty-nnie
+components:
+  - name: universal-developer-image
+    container:
+      image: registry.redhat.io/devspaces/udi-rhel9@sha256:65c893972c503b136d6b373c49f113b8c63530d4c7873ef8ab20357e5d43fe7a
+commands:
+  - id: never-exit
+    exec:
+      component: runtime
+      commandLine: "sleep infinity"
+      group:
+        kind: run
+      label: "Never Exiting Command"
+      workingDir: "/projects"
+      hotReloadCapable: false
+events:
+  postStart:
+    - never-exit
