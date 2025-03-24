@@ -1,23 +1,58 @@
-schemaVersion: 2.1.0
-metadata:
-  name: test-workspace
 components:
-  - name: runtime  # This must match the component referenced in postStart
+  - name: runtime
     container:
-      image: quay.io/devspaces/udi-rhel8:latest
-      memoryLimit: 2Gi
-      cpuLimit: 1000m
-      command: ["tail", "-f", "/dev/null"]  # Keeps container running
+      image: quay.io/eclipse/che-nodejs10-ubi:nightly
+      memoryLimit: 1024Mi
+      endpoints:
+        - name: "3000/tcp"
+          targetPort: 3000 
+      mountSources: true
+      command: ['tail']
+      args: [ '-f', '/dev/null']
+  - name: "tools"
+    container:
+      image: quay.io/eclipse/che-nodejs10-ubi:nightly
+      mountSources: true
+      memoryLimit: 1024Mi
 commands:
-  - id: never-exit
+  - id: copy
     exec:
-      component: runtime  # Matches the component name
-      commandLine: "sleep infinity"
-      group:
-        kind: run
-      label: "Never Exiting Command"
-      workingDir: "/projects"
-      hotReloadCapable: false
+      commandLine: "cp /tools/myfile.txt tools.txt"
+      component: tools
+      workingDir: /
+  - id: initCache
+    exec:
+      commandLine: "./init_cache.sh"
+      component: tools
+      workingDir: /
+  - id: connectDB
+    exec:
+      commandLine: "./connect_db.sh"
+      component: runtime
+      workingDir: /
+  - id: disconnectDB
+    exec:
+      commandLine: "./disconnect_db.sh"
+      component: runtime
+      workingDir: /
+  - id: cleanup
+    exec:
+      commandLine: "./cleanup.sh"
+      component: tools
+      workingDir: /
+  - id: postStartCompositeCmd
+    composite:
+      label: Copy and Init Cache
+      commands:
+        - copy
+        - initCache
+      parallel: true
 events:
+  preStart:
+    - "connectDB"
   postStart:
-    - never-exit
+    - "postStartCompositeCmd" 
+  preStop:
+    - "disconnectDB"
+  postStop:
+    - "cleanup"
