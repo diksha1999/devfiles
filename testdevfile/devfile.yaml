@@ -1,68 +1,18 @@
 schemaVersion: 2.2.0
 metadata:
-  name: test-workspace-2
+  name: test
 components:
-  - name: runtime
-    container:
-      image: quay.io/eclipse/che-nodejs10-ubi:nightly
-      memoryLimit: 1024Mi
-      endpoints:
-        - name: "3000/tcp"
-          targetPort: 3000 
-      mountSources: true
-      command: ['tail']
-      args: [ '-f', '/dev/null']
-  - name: "tools"
-    container:
-      image: quay.io/eclipse/che-nodejs10-ubi:nightly
-      mountSources: true
-      memoryLimit: 1024Mi
+  - container:
+      image: registry.redhat.io/devspaces/udi-rhel9
+      sourceMapping: /projects
+    name: tools
 commands:
-  - id: copy
+  - id: never-exit  #To sleep indefinitely
     exec:
-      commandLine: "cp /tools/myfile.txt tools.txt"
-      component: tools
-      workingDir: /
-  - id: initCache
-    exec:
-      commandLine: "./init_cache.sh"
-      component: tools
-      workingDir: /
-  - id: connectDB
-    exec:
-      commandLine: "./connect_db.sh"
-      component: runtime
-      workingDir: /
-  - id: disconnectDB
-    exec:
-      commandLine: "./disconnect_db.sh"
-      component: runtime
-      workingDir: /
-  - id: cleanup
-    exec:
-      commandLine: "./cleanup.sh"
-      component: tools
-      workingDir: /
-  - id: postStartCompositeCmd
-    composite:
-      label: Copy and Init Cache
-      commands:
-        - copy
-        - initCache
-      parallel: true
-  - id: never-exit  # New command to sleep indefinitely
-    exec:
-      component: runtime  # Runs inside the runtime container
+      component: tools  # Runs inside the runtime container
       commandLine: "sleep infinity"
       workingDir: "/"
       label: "Sleep Forever" 
 events:
-  preStart:
-    - "connectDB"
   postStart:
-    - "postStartCompositeCmd" 
     - "never-exit"  # Added sleep command to postStart
-  preStop:
-    - "disconnectDB"
-  postStop:
-    - "cleanup"
