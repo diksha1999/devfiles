@@ -4,6 +4,7 @@ metadata:
   version: 1.0.0
   displayName: Python Persistent Workspace
   description: Python workspace with persistent pip config
+
 components:
   - name: python
     container:
@@ -12,13 +13,15 @@ components:
       mountSources: true
       endpoints:
         - name: python
-          port: 8080
+          targetPort: 8080
       volumeMounts:
         - name: pip-config
           path: /home/user/.config/pip
+
   - name: pip-config
     volume:
       size: 1Gi
+
 commands:
   - id: start-python
     exec:
