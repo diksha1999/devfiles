@@ -1,0 +1,27 @@
+schemaVersion: 2.2.0
+metadata:
+  name: python-persistent-workspace
+  version: 1.0.0
+  displayName: Python Persistent Workspace
+  description: Python workspace with persistent pip config
+components:
+  - name: python
+    container:
+      image: registry.access.redhat.com/ubi8/python-39:latest
+      memoryLimit: 2048Mi
+      mountSources: true
+      endpoints:
+        - name: python
+          port: 8080
+      volumeMounts:
+        - name: pip-config
+          path: /home/user/.config/pip
+  - name: pip-config
+    volume:
+      size: 1Gi
+commands:
+  - id: start-python
+    exec:
+      component: python
+      commandLine: python --version
+      label: Check Python version
