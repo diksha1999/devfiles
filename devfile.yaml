@@ -16,6 +16,12 @@ components:
       - name: 'web'
         targetPort: 8080
         exposure: public
+      volumeMounts:
+        - name: pip-config
+          path: /home/user/.config/pip
+  - name: pip-config
+    volume:
+      size: 1Gi
    
 commands:
   - id: build
