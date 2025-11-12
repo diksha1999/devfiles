@@ -12,8 +12,9 @@ components:
       memoryLimit: 2048Mi
       mountSources: true
       endpoints:
-        - name: python
+        - name: 'python'
           targetPort: 8080
+          exposure: public
       volumeMounts:
         - name: pip-config
           path: /home/user/.config/pip
